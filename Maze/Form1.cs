@@ -23,7 +23,7 @@ namespace Maze
             int sizeY = 20;
 
             Width = sizeX * 16 + 16;
-            Height = sizeY * 16 + 40 + toolStrip1.Height;
+            Height = sizeY * 16 + 40 + toolStrip1.Height + statusStrip1.Height;
             StartPosition = FormStartPosition.CenterScreen;
         }
 
