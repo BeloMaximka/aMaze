@@ -25,7 +25,7 @@ namespace Maze
             GameResources.medal,
             GameResources.enemy,
             GameResources.player,
-            GameResources.player,
+            GameResources.heal,
             GameResources.exit,
         };
     }

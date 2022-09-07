@@ -59,6 +59,10 @@ namespace Maze
                     if (r.Next(250) == 0)
                         id = GameObjectTypes.Types.MEDAL;
 
+                    // в 1 случае из 250 - кладём аптечку
+                    if (r.Next(250) == 0)
+                        id = GameObjectTypes.Types.HEAL;
+
                     // в 1 случае из 250 - размещаем врага
                     if (r.Next(250) == 0)
                         id = GameObjectTypes.Types.ENEMY;
