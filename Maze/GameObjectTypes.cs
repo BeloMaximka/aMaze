@@ -9,7 +9,8 @@ namespace Maze
 {
     static class GameObjectTypes
     {
-        public enum Types {
+        public enum Types
+        {
             HALL,
             WALL,
             MEDAL,
