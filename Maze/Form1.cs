@@ -31,6 +31,9 @@ namespace Maze
         {
             lab = new Labirint(this, 40, 20, toolStrip1.Height);
             lab.PlayerStep += UpdateStepCounter;
+            lab.MedalPickup += UpdateMedals;
+            lab.GameEnd += EndGame;
+            lab.HealthChanged += UpdateHealth;
             lab.Show();
         }
 
@@ -52,10 +55,24 @@ namespace Maze
                     break;
             }
         }
-
+        void UpdateHealth(int health)
+        {
+            hpLabel.Text = $"Здоровье: {health}";
+        }
         void UpdateStepCounter(int steps)
         {
             stepsLabel.Text = $"Шаги: {steps}";
+        }
+
+        void UpdateMedals(int medals)
+        {
+            medalsLabel.Text = $"Медали: {medals}";
+        }
+
+        void EndGame(string message)
+        {
+            MessageBox.Show(message);
+            this.Close();
         }
     }
 }

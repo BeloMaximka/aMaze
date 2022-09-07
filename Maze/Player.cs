@@ -7,10 +7,13 @@ using System.Drawing;
 
 namespace Maze
 {
-    public delegate void PlayerStepHandler(int steps);
     internal class Player
     {
-        public event PlayerStepHandler PlayerStep;
+        static Random random = new Random();
+        public event Action<int> Step;
+        public event Action<int> HealthChange;
+        public event Action MedalPickup;
+        public event Action ExitFound;
         Point pos;
         Labirint lab;
 
@@ -31,7 +34,8 @@ namespace Maze
                 else if (value > 100)
                     health = 100;
                 else
-                    pos.X = value;
+                    health = value;
+                HealthChange(health);
             }
         }
         public int X
@@ -46,8 +50,7 @@ namespace Maze
                     pos.X = lab.Width - 1;
                 else
                     pos.X = value;
-                if (pos != oldPos)
-                    UpdatePlayerPos(oldPos);
+                UpdatePlayerPos(oldPos);
             }
         }
         public int Y
@@ -62,8 +65,7 @@ namespace Maze
                     pos.Y = lab.Width - 1;
                 else
                     pos.Y = value;
-                if (pos != oldPos)
-                    UpdatePlayerPos(oldPos);
+                UpdatePlayerPos(oldPos);
             }
         }
 
@@ -86,16 +88,42 @@ namespace Maze
                     lab[oldPos] = GameObjectTypes.Types.HALL;
                     lab[pos] = GameObjectTypes.Types.PLAYER;
                     break;
+                case GameObjectTypes.Types.MEDAL:
+                    lab[oldPos] = GameObjectTypes.Types.HALL;
+                    lab[pos] = GameObjectTypes.Types.PLAYER;
+                    MedalPickup.Invoke();
+                    break;
+                case GameObjectTypes.Types.HEAL:
+                    if (Health != 100)
+                    {
+                        lab[oldPos] = GameObjectTypes.Types.HALL;
+                        lab[pos] = GameObjectTypes.Types.PLAYER;
+                        Health += 5;
+                    }
+                    else
+                        playerMoved = false;
+                    break;
+                case GameObjectTypes.Types.ENEMY:
+                    lab[oldPos] = GameObjectTypes.Types.HALL;
+                    lab[pos] = GameObjectTypes.Types.PLAYER;
+                    Health -= random.Next(20, 26);
+                    break;
+                case GameObjectTypes.Types.EXIT:
+                    lab[oldPos] = GameObjectTypes.Types.HALL;
+                    lab[pos] = GameObjectTypes.Types.PLAYER;
+                    ExitFound.Invoke();
+                    break;
                 default:
-                    pos = oldPos;
                     playerMoved = false;
                     break;
             }
             if (playerMoved)
             {
                 Steps++;
-                PlayerStep(steps);
+                Step(steps);
             }
+            else
+                pos = oldPos;
         }
     }
 }

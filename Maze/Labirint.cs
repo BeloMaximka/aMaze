@@ -6,13 +6,15 @@ namespace Maze
 {
     class Labirint
     {
-        const int tileSize = 16;
-
-        PictureBox[,] maze;
-        public Player Character { get; private set; }
-
-        static Random r = new Random();
         Form parent;
+        static Random r = new Random();
+
+        const int tileSize = 16;
+        PictureBox[,] maze;
+
+        public Player Character { get; private set; }
+        public int maxMedals;
+        public int medalCount;
 
         public int Height { get; private set; } // высота лабиринта (количество строк)
         public int Width { get; private set; } // ширина лабиринта (количество столбцов в каждой строке)
@@ -25,15 +27,21 @@ namespace Maze
 
             maze = new PictureBox[height, width];
             Character = new Player(0, 2, this);
+            Character.MedalPickup += OnMedalPickup;
+            Character.Step += OnPlayerStep;
+            Character.HealthChange += OnHealthChanged;
+            Character.ExitFound += OnExitFound;
+            medalCount = 0;
+            maxMedals = 0;
 
             Generate(offsetY);
         }
 
-        public event PlayerStepHandler PlayerStep
-        {
-            add { Character.PlayerStep += value; }
-            remove { Character.PlayerStep -= value; }
-        }
+        public event Action<int> PlayerStep;
+        public event Action<int> HealthChanged;
+        public event Action<int> MedalPickup;
+        public event Action<string> GameEnd;
+
         public GameObjectTypes.Types this[Point pos]
         {
             get { return (GameObjectTypes.Types)maze[pos.Y, pos.X].Tag; }
@@ -55,16 +63,19 @@ namespace Maze
                     if (r.Next(5) == 0)
                         id = GameObjectTypes.Types.WALL;
 
-                    // в 1 случае из 250 - кладём денежку
-                    if (r.Next(250) == 0)
+                    // в 1 случае из 150 - кладём денежку
+                    if (r.Next(150) == 0)
+                    {
                         id = GameObjectTypes.Types.MEDAL;
+                        maxMedals++;
+                    }
 
-                    // в 1 случае из 250 - кладём аптечку
-                    if (r.Next(250) == 0)
+                    // в 1 случае из 150 - кладём аптечку
+                    if (r.Next(150) == 0)
                         id = GameObjectTypes.Types.HEAL;
 
-                    // в 1 случае из 250 - размещаем врага
-                    if (r.Next(250) == 0)
+                    // в 1 случае из 150 - размещаем врага
+                    if (r.Next(150) == 0)
                         id = GameObjectTypes.Types.ENEMY;
 
                     // стены по периметру обязательны
@@ -94,7 +105,27 @@ namespace Maze
                 }
             }
         }
-
+        protected virtual void OnMedalPickup()
+        {
+            medalCount++;
+            MedalPickup(medalCount);
+            if (medalCount == maxMedals)
+                GameEnd("Победа - медали собраны!");
+        }
+        protected virtual void OnPlayerStep(int steps)
+        {
+            PlayerStep(steps);
+        }
+        protected virtual void OnHealthChanged(int health)
+        {
+            HealthChanged(health);
+            if (health == 0)
+                GameEnd("Поражение - закончилось здоровье.");
+        }
+        protected virtual void OnExitFound()
+        {
+            GameEnd("Победа - найден выход!");
+        }
         public void Show()
         {
             for (int y = 0; y < Height; y++)
